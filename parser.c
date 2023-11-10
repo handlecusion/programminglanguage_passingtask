@@ -34,6 +34,11 @@ int lex();
 #define DIV_OP 24
 #define LEFT_PAREN 25
 #define RIGHT_PAREN 26
+/*
+* #define SEME_COLON 
+* lookup function add case ';' to SEME_COLON
+* ; read next line and count IDENT, CONST, OP / it will be global variable
+*/
 
 /******************************************************/
 /* main driver */
