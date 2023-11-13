@@ -37,7 +37,16 @@ int lex();
 /*
 * #define SEME_COLON 
 * lookup function add case ';' to SEME_COLON
-* ; read next line and count IDENT, CONST, OP / it will be global variable
+* ; read next line and count IDENT, CONST, OP
+* it will be global variable
+* 
+* define variabel with struct.
+* it work as symbol table.
+* struct symbol
+* 	char* name, int value
+* then it will use define variable
+* 
+* how can calculate?
 */
 
 /******************************************************/
@@ -87,6 +96,10 @@ int lookup (char ch) {
         addChar();
         nextToken = DIV_OP;
         break;
+	case '=' :
+		addChar();
+		nextToken = ASSIGN_OP;
+		break;
 
     default :
         addChar();
@@ -125,7 +138,7 @@ void getChar() {
 /* getNonBlank - a function to call getChar until it
 returns a non-whitespace character */
 void getNonBlank() {
-    while (isspace (nextChar)) {
+    while (nextChar <= 32) {
         getChar();
     }
 }
@@ -174,6 +187,15 @@ int lex() {
         lexeme[3] = 0;
         break;
     } /* End of switch */
+//	switch (nextToken)
+//	{
+//		case IDENT:
+//			CNT_ID++;
+//			break;
+//
+//		case 
+//
+
     printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
     return nextToken;
 } /* End of function lex */
