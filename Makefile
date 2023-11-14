@@ -1,7 +1,7 @@
 NAME = a.exe
 CC = gcc
 CFLAGS = 
-SRCS = parser.c
+SRCS = parser.c calculer.c
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 
 all: $(NAME)
