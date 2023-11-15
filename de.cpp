@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include <unordered_map>
 #include <sstream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,6 +30,7 @@ public:
     Parser(string input) : input_(move(input)), currentPos_(0) {}
 
     void parse() {
+        parseDeclarations();
         parseStatements();
         printSymbolTable();
     }
@@ -81,9 +82,10 @@ private:
                         identifier << input_[currentPos_++];
                     }
                     return {TokenType::IDENTIFIER, identifier.str()};
-                } else if (isdigit(currentChar)) {
+                } else if (isdigit(currentChar) || (currentChar == '-' && isdigit(input_[currentPos_ + 1]))) {
                     stringstream constant;
-                    while (isdigit(input_[currentPos_])) {
+                    constant << input_[currentPos_++];
+                    while (isdigit(input_[currentPos_]) || input_[currentPos_] == '.') {
                         constant << input_[currentPos_++];
                     }
                     return {TokenType::CONSTANT, constant.str()};
@@ -106,61 +108,54 @@ private:
         }
     }
 
-    int factor() {
+    void factor() {
         Token token = getNextToken();
         switch (token.type) {
             case TokenType::IDENTIFIER:
-                return symbolTable[token.lexeme];
+                return;
             case TokenType::CONSTANT:
-                return stoi(token.lexeme);
-            case TokenType::LEFT_PAREN: {
-                int result = expression();
+                return;
+            case TokenType::LEFT_PAREN:
+                expression();
                 match(TokenType::RIGHT_PAREN);
-                return result;
-            }
+                return;
             default:
                 error("Unexpected token in factor: " + token.lexeme);
-                return 0;
         }
     }
 
-    int term() {
-        int result = factor();
+    void term() {
+        factor();
         while (true) {
             Token token = getNextToken();
             switch (token.type) {
                 case TokenType::MULTIPLY:
-                    result *= factor();
+                    factor();
                     break;
-                case TokenType::DIVIDE: {
-                    int denominator = factor();
-                    if (denominator == 0) {
-                        error("Division by zero");
-                    }
-                    result /= denominator;
+                case TokenType::DIVIDE:
+                    factor();
                     break;
-                }
                 default:
                     currentPos_--;
-                    return result;
+                    return;
             }
         }
     }
 
-    int expression() {
-        int result = term();
+    void expression() {
+        term();
         while (true) {
             Token token = getNextToken();
             switch (token.type) {
                 case TokenType::ADD:
-                    result += term();
+                    term();
                     break;
                 case TokenType::SUBTRACT:
-                    result -= term();
+                    term();
                     break;
                 default:
                     currentPos_--;
-                    return result;
+                    return;
             }
         }
     }
@@ -168,8 +163,18 @@ private:
     void assignment() {
         Token identifier = getNextToken();
         match(TokenType::ASSIGN);
-        int value = expression();
-        symbolTable[identifier.lexeme] = value;
+        expression();
+        symbolTable[identifier.lexeme] = 0; // placeholder value
+    }
+
+    void declaration() {
+        Token identifier = getNextToken();
+        if (getNextToken().type == TokenType::ASSIGN) {
+            match(TokenType::ASSIGN);
+            expression();
+        }
+        match(TokenType::SEMICOLON);
+        symbolTable[identifier.lexeme] = 0; // placeholder value
     }
 
     void statement() {
@@ -179,20 +184,31 @@ private:
                 currentPos_--;
                 assignment();
                 break;
-            default:
+            case TokenType::CONSTANT:
                 currentPos_--;
-                cout << "Result: " << expression() << endl;
+                expression();
+                match(TokenType::SEMICOLON);
                 break;
+            default:
+                error("Unexpected token in statement: " + token.lexeme);
         }
-        // 각 문장이 세미콜론으로 끝날 것으로 예상하고 추가
-        match(TokenType::SEMICOLON);
+    }
+
+    void parseDeclarations() {
+        while (true) {
+            declaration();
+            Token token = getNextToken();
+            if (token.type != TokenType::IDENTIFIER && token.type != TokenType::END_OF_INPUT) {
+                break;
+            }
+        }
     }
 
     void parseStatements() {
         while (true) {
             statement();
-            // 입력 끝에 도달하면 종료
-            if (getNextToken().type == TokenType::END_OF_INPUT) {
+            Token token = getNextToken();
+            if (token.type == TokenType::END_OF_INPUT) {
                 break;
             }
         }
@@ -229,4 +245,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-

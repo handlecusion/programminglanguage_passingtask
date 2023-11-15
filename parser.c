@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
         do {
             lex();
         } while (nextToken != EOF);
+		fclose(in_fp);
+		printf("close file");
     }
     return 0;
 }
@@ -67,7 +69,10 @@ int lookup (char ch) {
 		addChar();
 		nextToken = ASSIGN_OP;
 		break;
-
+	case ';' :
+		addChar();
+		nextToken = SEMI_COLON;
+		break;
     default :
         addChar();
         nextToken = EOF;
@@ -89,7 +94,7 @@ void addChar() {
 /* getChar - a function to get the next character of
 input and determine its character class */
 void getChar() {
-    if ((nextChar = getc(in_fp)) !=EOF) {
+    if ((nextChar = getc(in_fp)) != EOF) {
         if (isalpha(nextChar))
             charClass = LETTER;
         else if (isdigit(nextChar))
@@ -105,7 +110,7 @@ void getChar() {
 /* getNonBlank - a function to call getChar until it
 returns a non-whitespace character */
 void getNonBlank() {
-    while (nextChar <= 32) {
+    while (nextChar <= 32 && nextChar != -1) {
         getChar();
     }
 }

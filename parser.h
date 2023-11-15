@@ -37,6 +37,7 @@ int lex();
 #define DIV_OP 24
 #define LEFT_PAREN 25
 #define RIGHT_PAREN 26
+#define SEMI_COLON 27
 /*
 * #define SEME_COLON 
 * lookup function add case ';' to SEME_COLON
