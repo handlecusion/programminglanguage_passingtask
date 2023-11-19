@@ -1,12 +1,22 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "calculer.h"
 
-// 스택을 위한 구조체 정의
-typedef struct {
-    char* items;
-    int top;
-    int maxSize;
-} Stack;
+//int main()
+//{
+//	char 	c[10] = "5+3*2";
+//	int a = evaluate(c);
+//	printf("%d", a);
+//}
+
+// return calculer value / null when error
+int	evaluate(char *c)
+{
+	char	*d;
+	int		r;
+
+	d = (char *) malloc(strlen(c));
+	infixToPostfix(c, d);
+	return (evaluatePostfix(d));
+}
 
 // 스택 초기화
 void initialize(Stack* stack, int maxSize) {
