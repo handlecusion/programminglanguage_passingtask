@@ -7,27 +7,6 @@
 #include <string.h>
 #include "calculer.h"
 
-/* Global declarations */
-/* Variables */
-int 	charClass;
-char 	lexeme[100];
-char 	nextChar;
-int 	lexLen;
-int 	token;
-int 	nextToken;
-FILE 	*in_fp, *fopen();
-
-int		cntId, cntConst, cntOp;
-int		correct;
-char	formular;
-
-/* Function declarations */
-int	lookup(char ch);
-void addChar();
-void getChar();
-void getNonBlank();
-int lex();
-
 /* Character classes */
 #define LETTER 0
 #define DIGIT 1
@@ -44,6 +23,38 @@ int lex();
 #define LEFT_PAREN 25
 #define RIGHT_PAREN 26
 #define SEMI_COLON 27
+#define SPACE 9
+
+/* Struct define */
+typedef struct
+{
+    char    *name;
+    int     value;
+} Var;
+
+/* Global declarations */
+/* Variables */
+int 	charClass;
+char 	lexeme[100];
+char 	nextChar;
+int 	lexLen;
+int 	token;
+int 	nextToken;
+FILE 	*in_fp, *fopen();
+
+int		cntId, cntConst, cntOp;
+int		correct;
+char	formular;
+
+/* Function declarations */
+int     lookup(char ch);
+void    addChar();
+void    getChar();
+void    getNonBlank();
+int     lex();
+
+Var var[100];
+
 /*
 * #define SEME_COLON 
 * lookup function add case ';' to SEME_COLON

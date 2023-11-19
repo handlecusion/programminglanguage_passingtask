@@ -16,156 +16,26 @@
 * -> include calculer.c
 */
 
-void program();
-void statements();
-void statement();
-void expression();
-void term();
-void term_tail();
-void factor();
-void factor_tail();
-void ident();
-void constt();
-void match(int expectedToken);
-void error();
+/******************************************************/
+/* main driver */
 
-void program() {
-    statements();
-}
-
-void statements() {
-    statement();
-    printf("statements");
-    if (nextToken == SEMI_COLON) {
-        match(SEMI_COLON);
-        statements();
-    }
-}
-
-void statement() {
-    ident();
-    getChar();
-    match(ASSIGN_OP);
-    expression();
-    printf("statement");
-    if (nextChar = ';') {
-        nextToken = SEMI_COLON;
-        match(SEMI_COLON);
-        printf("Assignment statement parsed\n");
-    } else if(charClass == EOF)
-    {
-        return ;
-    } else
-    {
-        error();
-    }
-}
-
-void expression() {
-    term();
-    term_tail();
-}
-
-void term_tail() {
-    printf("term_tail function in\n");
-    getChar();
-    getNonBlank();
-    if (nextChar == '+') {
-        match(ADD_OP);
-        term();
-        term_tail();
-    }
-}
-
-void term() {
-    factor();
-    factor_tail();
-}
-
-void factor_tail() {
-    if (nextToken == MULT_OP) {
-        match(MULT_OP);
-        factor();
-        factor_tail();
-    }
-}
-
-void factor() {
-    //printf("factor func in\n");
-    getChar();
-    getNonBlank();
-    if (nextChar == '(') {
-        match(LEFT_PAREN);
-        expression();
-        match(RIGHT_PAREN);
-    } else if (charClass == LETTER) {
-        ident();
-        printf("Identifier parsed: %s\n", lexeme);
-    } else if (charClass == DIGIT) {
-        constt();
-        printf("Constant parsed: %s\n", lexeme);
-    } else {
-        error();
-    }
-}
-
-void ident() {
-    lexLen = 0;
-    getNonBlank();
-    if (charClass == LETTER) {
-        addChar();
-        getChar();
-        while (charClass == LETTER || charClass == DIGIT)
-		{
-            addChar(); 
-            getChar();
-        }
-    }
-}
-
-void constt() {
-    lexLen = 0;
-    getNonBlank();
-    if (charClass == DIGIT) {
-        addChar();
-        getChar();
-        while (charClass == DIGIT)
-		{
-            addChar(); 
-            getChar();
-        }
-        nextToken = INT_LIT;
-    }
-}
-
-void match(int expectedToken) {
-    if (nextToken == expectedToken) {
-        printf("match expectToken : %d\n", nextChar);
-    } else {
-        error();
-    }
-}
-
-void error() {
-    printf("Error: Unexpected token : %d\n", nextToken);
-    printf("Error: next char : %d\n", nextChar);
-    exit(1);
-}
-
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     printf("Starting ..... \n");
 
-    if ((in_fp = fopen(argv[1], "r")) == NULL) {
+/* Open the input data file and process its contents */
+    if (( in_fp = fopen(argv[1], "r")) == NULL) {
         printf("ERROR");
     } else {
         getChar();
-        program();
-        fclose(in_fp);
-        printf("File closed\n");
+        do {
+            lex();
+        } while (nextToken != EOF);
+		fclose(in_fp);
+		printf("close file");
     }
-
     return 0;
 }
+
 
 /*****************************************************/ 
 /* lookup - a function to lookup operators and parentheses and return the token */
@@ -225,17 +95,11 @@ void addChar() {
 input and determine its character class */
 void getChar() {
     if ((nextChar = getc(in_fp)) != EOF) {
-        //printf("getChar : nextChar - %d\n", nextChar);
-        if (isalpha(nextChar) || nextChar == '_')
+        if (isalpha(nextChar))
             charClass = LETTER;
         else if (isdigit(nextChar))
-            charClass = DIGIT;
-        else if (nextChar <= 32 && nextChar != -1)
-            charClass = SPACE;
-        else {
-            charClass = UNKNOWN;
-            lookup(nextChar);
-        }
+                charClass = DIGIT;
+        else charClass = UNKNOWN;
     } 
     else
         charClass = EOF;
@@ -297,6 +161,40 @@ int lex() {
         lexeme[3] = 0;
         break;
     } /* End of switch */
+	switch (nextToken)
+	{
+		case IDENT:
+			cntId++;
+			break;
+		case INT_LIT:
+			cntConst++;
+			break;
+		case ASSIGN_OP:
+			cntOp++;
+			break;
+		case ADD_OP:
+			cntOp++;
+			break;
+		case SUB_OP:
+			cntOp++;
+			break;
+		case MULT_OP:
+			cntOp++;
+			break;
+		case DIV_OP:
+			cntOp++;
+			break;
+		case LEFT_PAREN:
+			break;
+		case RIGHT_PAREN:
+			break;
+		case SEMI_COLON:
+			printf("ID : %d; CONST : %d; OP : %d;\n", cntId, cntConst, cntOp);
+			cntId = 0;
+			cntConst = 0;
+			cntOp = 0;
+			break;
+	}
 
 
     //printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);

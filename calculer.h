@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
+typedef struct
+{
     char* items;
     int top;
     int maxSize;
