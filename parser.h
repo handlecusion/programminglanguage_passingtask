@@ -3,17 +3,23 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 #include "calculer.h"
 
 /* Global declarations */
 /* Variables */
-int charClass;
-char lexeme[100];
-char nextChar;
-int lexLen;
-int token;
-int nextToken;
-FILE *in_fp, *fopen();
+int 	charClass;
+char 	lexeme[100];
+char 	nextChar;
+int 	lexLen;
+int 	token;
+int 	nextToken;
+FILE 	*in_fp, *fopen();
+
+int		cntId, cntConst, cntOp;
+int		correct;
+char	formular;
 
 /* Function declarations */
 int	lookup(char ch);

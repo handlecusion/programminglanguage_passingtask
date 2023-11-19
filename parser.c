@@ -126,7 +126,8 @@ int lex() {
     case LETTER:
         addChar();
         getChar();
-        while (charClass == LETTER || charClass == DIGIT) {
+        while (charClass == LETTER || charClass == DIGIT)
+		{
             addChar(); 
             getChar();
         }
@@ -137,7 +138,8 @@ int lex() {
     case DIGIT:
         addChar();
         getChar();
-        while (charClass == DIGIT) {
+        while (charClass == DIGIT)
+		{
             addChar(); 
             getChar();
         }
@@ -159,15 +161,42 @@ int lex() {
         lexeme[3] = 0;
         break;
     } /* End of switch */
-//	switch (nextToken)
-//	{
-//		case IDENT:
-//			CNT_ID++;
-//			break;
-//
-//		case 
-//
+	switch (nextToken)
+	{
+		case IDENT:
+			cntId++;
+			break;
+		case INT_LIT:
+			cntConst++;
+			break;
+		case ASSIGN_OP:
+			cntOp++;
+			break;
+		case ADD_OP:
+			cntOp++;
+			break;
+		case SUB_OP:
+			cntOp++;
+			break;
+		case MULT_OP:
+			cntOp++;
+			break;
+		case DIV_OP:
+			cntOp++;
+			break;
+		case LEFT_PAREN:
+			break;
+		case RIGHT_PAREN:
+			break;
+		case SEMI_COLON:
+			printf("ID : %d; CONST : %d; OP : %d;\n", cntId, cntConst, cntOp);
+			cntId = 0;
+			cntConst = 0;
+			cntOp = 0;
+			break;
+	}
 
-    printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
+
+    //printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
     return nextToken;
 } /* End of function lex */
