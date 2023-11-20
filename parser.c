@@ -16,18 +16,6 @@
 * -> include calculer.c
 */
 
-void program();
-void statements();
-void statement();
-void expression();
-void term();
-void term_tail();
-void factor();
-void factor_tail();
-void ident();
-void constt();
-void match(int expectedToken);
-void error();
 
 void program() {
     statements();
@@ -35,27 +23,30 @@ void program() {
 
 void statements() {
     statement();
-    printf("statements");
     if (nextToken == SEMI_COLON) {
-        match(SEMI_COLON);
+        //match(SEMI_COLON);
+		printf("ID : %d ; CONST : %d ; OP : %d ;\n", cntId, cntConst, cntOp);
+		cntId = 0;
+		cntConst = 0;
+		cntOp = 0;
+		lex();
+		if (nextChar == EOF)
+			return ;
         statements();
     }
 }
 
 void statement() {
     ident();
-    getChar();
-    match(ASSIGN_OP);
+	lex();
+    //match(ASSIGN_OP);
     expression();
-    printf("statement");
-    if (nextChar = ';') {
+    if (nextToken == SEMI_COLON)
+	{
         nextToken = SEMI_COLON;
-        match(SEMI_COLON);
-        printf("Assignment statement parsed\n");
-    } else if(charClass == EOF)
-    {
-        return ;
-    } else
+        //match(SEMI_COLON);
+	}
+    else
     {
         error();
     }
@@ -67,14 +58,21 @@ void expression() {
 }
 
 void term_tail() {
-    printf("term_tail function in\n");
-    getChar();
-    getNonBlank();
-    if (nextChar == '+') {
-        match(ADD_OP);
+    //printf("term_tail function in\n");
+    if (nextToken == ADD_OP)
+	{
+        //match(ADD_OP);
+		lex();
         term();
         term_tail();
     }
+	else if(nextToken == SUB_OP)
+	{
+		//match(SUB_OP);
+		lex();
+		term();
+		term_tail();
+	}
 }
 
 void term() {
@@ -83,59 +81,63 @@ void term() {
 }
 
 void factor_tail() {
-    if (nextToken == MULT_OP) {
-        match(MULT_OP);
+	//printf("factor_tail : nextChar %d\n", nextChar);
+    if (nextToken == MULT_OP)
+	{
+        //match(MULT_OP);
+		lex();
         factor();
         factor_tail();
     }
+	else if (nextToken == DIV_OP)
+	{
+		//match(DIV_OP);
+		lex();
+		factor();
+		factor_tail();
+	}
 }
 
 void factor() {
     //printf("factor func in\n");
-    getChar();
-    getNonBlank();
-    if (nextChar == '(') {
-        match(LEFT_PAREN);
+    if (nextToken == LEFT_PAREN) {
+        //match(LEFT_PAREN);
+		lex();
         expression();
-        match(RIGHT_PAREN);
-    } else if (charClass == LETTER) {
-        ident();
+		if (nextToken == RIGHT_PAREN)
+			lex();
+		else
+			error();
+        //match(RIGHT_PAREN);
+    } else if (nextToken == IDENT) {
         printf("Identifier parsed: %s\n", lexeme);
-    } else if (charClass == DIGIT) {
-        constt();
+        ident();
+    } else if (nextToken == INT_LIT) {
         printf("Constant parsed: %s\n", lexeme);
+        constt();
     } else {
         error();
     }
 }
 
 void ident() {
-    lexLen = 0;
-    getNonBlank();
-    if (charClass == LETTER) {
-        addChar();
-        getChar();
-        while (charClass == LETTER || charClass == DIGIT)
-		{
-            addChar(); 
-            getChar();
-        }
-    }
+	if (nextToken == IDENT)
+	{
+		cntId++;
+		lex();
+	}
+	else
+		error();
 }
 
 void constt() {
-    lexLen = 0;
-    getNonBlank();
-    if (charClass == DIGIT) {
-        addChar();
-        getChar();
-        while (charClass == DIGIT)
-		{
-            addChar(); 
-            getChar();
-        }
-        nextToken = INT_LIT;
-    }
+	if (nextToken == INT_LIT)
+	{
+		cntConst++;
+		lex();
+	}
+	else
+		error();
 }
 
 void match(int expectedToken) {
@@ -158,7 +160,7 @@ int main(int argc, char **argv) {
     if ((in_fp = fopen(argv[1], "r")) == NULL) {
         printf("ERROR");
     } else {
-        getChar();
+		lex();
         program();
         fclose(in_fp);
         printf("File closed\n");
@@ -214,6 +216,7 @@ int lookup (char ch) {
 /*****************************************************/ 
 /* addChar - a function to add nextChar to lexeme */
 void addChar() {
+	//printf("addChar : nextChar : %c\n", nextChar);
     if (lexLen <= 98) {
         lexeme[lexLen++] = nextChar;
         lexeme[lexLen] = 0;
@@ -230,8 +233,8 @@ void getChar() {
             charClass = LETTER;
         else if (isdigit(nextChar))
             charClass = DIGIT;
-        else if (nextChar <= 32 && nextChar != -1)
-            charClass = SPACE;
+		else if (nextChar <= 32 && nextChar != -1)
+			charClass = SPACE;
         else {
             charClass = UNKNOWN;
             lookup(nextChar);
@@ -246,9 +249,9 @@ void getChar() {
 /* getNonBlank - a function to call getChar until it
 returns a non-whitespace character */
 void getNonBlank() {
-    while (nextChar <= 32 && nextChar != -1) {
-        getChar();
-    }
+	do {
+		getChar();
+	} while (nextChar <= 32 && nextChar != -1);
 }
 
 /*****************************************************/
@@ -284,10 +287,14 @@ int lex() {
 
     /* Parentheses and operators */
     case UNKNOWN:
-        lookup(nextChar);
+        //lookup(nextChar);
         getChar();
         break;
-
+	
+	/* Space */
+	case SPACE:
+    	getNonBlank();
+		break;
     /* EOF */
     case EOF:
         nextToken = EOF;
@@ -298,7 +305,6 @@ int lex() {
         break;
     } /* End of switch */
 
-
-    //printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
+    printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
     return nextToken;
 } /* End of function lex */

@@ -44,7 +44,9 @@ FILE 	*in_fp, *fopen();
 
 int		cntId, cntConst, cntOp;
 int		correct;
-char	formular;
+
+char	formular[200];
+int		forLen;
 
 /* Function declarations */
 int     lookup(char ch);
@@ -52,6 +54,21 @@ void    addChar();
 void    getChar();
 void    getNonBlank();
 int     lex();
+
+/* Grammar declarations */
+void program();
+void statements();
+void statement();
+void expression();
+void term();
+void term_tail();
+void factor();
+void factor_tail();
+void ident();
+void constt();
+void match(int expectedToken);
+void error();
+
 
 Var var[100];
 
