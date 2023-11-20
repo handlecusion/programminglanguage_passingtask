@@ -1,23 +1,6 @@
 #include "parser.h"
 #include "calculer.h"
 
-/*
-* #define SEME_COLON 
-* lookup function add case ';' to SEME_COLON
-* ; read next line and count IDENT, CONST, OP
-* it will be global variable
-* 
-* define variabel with struct.
-* it work as symbol table.
-* struct symbol
-* 	char* name, int value
-* then it will use define variable
-* 
-* how can calculate?
-* -> include calculer.c
-*/
-
-
 void program() {
     statements();
 	printf("Result ==> ");
@@ -29,17 +12,14 @@ void program() {
 void statements() {
     statement();
     if (nextToken == SEMI_COLON) {
-        //match(SEMI_COLON);
-		//printf("%s\n", formular);
 		printf("%s", line);
-		//printf("formular : %s\n", formular);
 		printf("ID : %d ; CONST : %d ; OP : %d ;\n", cntId, cntConst, cntOp);
 		if (err == 0)
 			printf("(OK)\n");
 		else if (err == 1)
-			printf("(Error) duplication operator : process by adding the last op\n");
+			printf("(Warning) duplication operator : process by adding the last op\n");
 		else if (err == 2)
-			printf("(Error) wrong ident name : remove front wrong part\n");
+			printf("(Warning) wrong ident name : remove front wrong part\n");
 		else if (err == 3)
 			printf("(Error) not defined ident : use null value\n");
 		else
@@ -61,7 +41,6 @@ void statements() {
 void statement() {
     ident();
 	var[varLen].name = strdup(lexeme);
-	//printf("var name : %s\n", var[varLen].name);
 	lex(); //add
 	strcat(line, " = ");
 	lex();
@@ -69,12 +48,10 @@ void statement() {
     expression();
     if (nextToken == SEMI_COLON)
 	{
-        //match(SEMI_COLON);
 		if (strchr(formular, '$'))
 			var[varLen].value = NULL;
 		else
 			var[varLen].value = evaluate(formular);
-		//printf("var value : %s\n", var[varLen].value);
 		varLen++;
 	}
     else
@@ -89,10 +66,8 @@ void expression() {
 }
 
 void term_tail() {
-    //printf("term_tail function in\n");
     if (nextToken == ADD_OP)
 	{
-        //match(ADD_OP);
 		strcat(formular, "+");
 		if (strlen(lexeme) != 1)
 			err = 1;
@@ -102,7 +77,6 @@ void term_tail() {
     }
 	else if(nextToken == SUB_OP)
 	{
-		//match(SUB_OP);
 		strcat(formular, "-");
 		if (strlen(lexeme) != 1)
 			err = 1;
@@ -118,10 +92,8 @@ void term() {
 }
 
 void factor_tail() {
-	//printf("factor_tail : nextChar %d\n", nextChar);
     if (nextToken == MULT_OP)
 	{
-        //match(MULT_OP);
 		strcat(formular, "*");
 		if (strlen(lexeme) != 1)
 			err = 1;
@@ -131,7 +103,6 @@ void factor_tail() {
     }
 	else if (nextToken == DIV_OP)
 	{
-		//match(DIV_OP);
 		strcat(formular, "/");
 		if (strlen(lexeme) != 1)
 			err = 1;
@@ -142,9 +113,7 @@ void factor_tail() {
 }
 
 void factor() {
-    //printf("factor func in\n");
     if (nextToken == LEFT_PAREN) {
-        //match(LEFT_PAREN);
 		strcat(formular, "(");
 		if (strlen(lexeme) != 1)
 			err = 1;
@@ -159,7 +128,6 @@ void factor() {
 		}
 		else
 			error();
-        //match(RIGHT_PAREN);
     } else if (nextToken == IDENT) {
 		if (searchValue(lexeme) == NULL)
 		{
@@ -170,12 +138,10 @@ void factor() {
 		}
 		else
 			strcat(formular, searchValue(lexeme));
-        //printf("Identifier parsed: %s\n", lexeme);
         ident();
 		lex();
     } else if (nextToken == INT_LIT) {
 		strcat(formular, lexeme);
-        //printf("Constant parsed: %s\n", lexeme);
         constt();
     } else {
         error();
@@ -187,7 +153,6 @@ void ident() {
 		cntId++;
 	else
 	{
-		//printf("Charclass in ident : %d", nextChar);
 		if (charClass == LETTER)
 		{
 			lexLen = 0;
@@ -231,7 +196,6 @@ void match(int expectedToken) {
 
 char	*searchValue(char *s)
 {
-	//printf("searchValue : varLen %d\n", varLen);
 	for (int i = 0; i < varLen; i++)
 	{
 		if (!strcmp(s, var[i].name) && var[i].value != NULL)
@@ -247,7 +211,6 @@ void error() {
 }
 
 int main(int argc, char **argv) {
-    //printf("Starting ..... \n");
 
     if ((in_fp = fopen(argv[1], "r")) == NULL) {
         printf("ERROR");
@@ -255,7 +218,6 @@ int main(int argc, char **argv) {
 		lex();
         program();
         fclose(in_fp);
-        //printf("File closed\n");
     }
 
     return 0;
@@ -308,7 +270,6 @@ int lookup (char ch) {
 /*****************************************************/ 
 /* addChar - a function to add nextChar to lexeme */
 void addChar() {
-	//printf("addChar : nextChar : %c\n", nextChar);
     if (lexLen <= 98) {
         lexeme[lexLen++] = nextChar;
         lexeme[lexLen] = 0;
@@ -320,7 +281,6 @@ void addChar() {
 input and determine its character class */
 void getChar() {
     if ((nextChar = getc(in_fp)) != EOF) {
-        //printf("getChar : nextChar - %d\n", nextChar);
         if (isalpha(nextChar) || nextChar == '_')
             charClass = LETTER;
         else if (isdigit(nextChar))
