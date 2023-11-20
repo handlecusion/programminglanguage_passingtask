@@ -29,7 +29,7 @@
 typedef struct
 {
     char    *name;
-    int     value;
+    char	*value;
 } Var;
 
 /* Global declarations */
@@ -69,8 +69,10 @@ void constt();
 void match(int expectedToken);
 void error();
 
+char	*searchValue(char *s);
 
 Var var[100];
+int	varLen;
 
 /*
 * #define SEME_COLON 

@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "calculer.h"
 
 /*
 * #define SEME_COLON 
@@ -25,7 +26,9 @@ void statements() {
     statement();
     if (nextToken == SEMI_COLON) {
         //match(SEMI_COLON);
+		printf("%s\n", formular);
 		printf("ID : %d ; CONST : %d ; OP : %d ;\n", cntId, cntConst, cntOp);
+		formular[0] = 0;
 		cntId = 0;
 		cntConst = 0;
 		cntOp = 0;
@@ -38,13 +41,18 @@ void statements() {
 
 void statement() {
     ident();
+	var[varLen].name = strdup(lexeme);
+	printf("var name : %s", var[varLen].name);
+	lex(); //add
 	lex();
     //match(ASSIGN_OP);
     expression();
     if (nextToken == SEMI_COLON)
 	{
-        nextToken = SEMI_COLON;
         //match(SEMI_COLON);
+		var[varLen].value = strdup(formular);
+		printf("var formular : %s\n", formular);
+		varLen++;
 	}
     else
     {
@@ -62,6 +70,7 @@ void term_tail() {
     if (nextToken == ADD_OP)
 	{
         //match(ADD_OP);
+		strcat(formular, "+");
 		lex();
         term();
         term_tail();
@@ -69,6 +78,7 @@ void term_tail() {
 	else if(nextToken == SUB_OP)
 	{
 		//match(SUB_OP);
+		strcat(formular, "-");
 		lex();
 		term();
 		term_tail();
@@ -85,6 +95,7 @@ void factor_tail() {
     if (nextToken == MULT_OP)
 	{
         //match(MULT_OP);
+		strcat(formular, "*");
 		lex();
         factor();
         factor_tail();
@@ -92,6 +103,7 @@ void factor_tail() {
 	else if (nextToken == DIV_OP)
 	{
 		//match(DIV_OP);
+		strcat(formular, "/");
 		lex();
 		factor();
 		factor_tail();
@@ -102,17 +114,26 @@ void factor() {
     //printf("factor func in\n");
     if (nextToken == LEFT_PAREN) {
         //match(LEFT_PAREN);
+		strcat(formular, "(");
 		lex();
         expression();
 		if (nextToken == RIGHT_PAREN)
+		{
+			strcat(formular, ")");
 			lex();
+		}
 		else
 			error();
         //match(RIGHT_PAREN);
     } else if (nextToken == IDENT) {
+		if (searchValue == NULL)
+			error();
+		strcat(formular, searchValue(lexeme));
         printf("Identifier parsed: %s\n", lexeme);
         ident();
+		lex();
     } else if (nextToken == INT_LIT) {
+		strcat(formular, lexeme);
         printf("Constant parsed: %s\n", lexeme);
         constt();
     } else {
@@ -124,7 +145,7 @@ void ident() {
 	if (nextToken == IDENT)
 	{
 		cntId++;
-		lex();
+		//lex();
 	}
 	else
 		error();
@@ -146,6 +167,16 @@ void match(int expectedToken) {
     } else {
         error();
     }
+}
+
+char	*searchValue(char *s)
+{
+	for (int i = 0; i <= varLen; i++)
+	{
+		if (strcmp(s, var[i].name))
+			return (strdup(var[i].value));
+	}
+	return NULL;
 }
 
 void error() {
