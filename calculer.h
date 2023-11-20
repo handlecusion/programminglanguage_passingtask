@@ -12,7 +12,7 @@ typedef struct
     int maxSize;
 } Stack;
 
-int		evaluate(char *c);
+char	*evaluate(char *c);
 void 	initialize(Stack* stack, int maxSize);
 int 	isEmpty(Stack* stack);
 int 	isFull(Stack* stack);
@@ -22,5 +22,6 @@ char 	peek(Stack* stack);
 int 	getPriority(char op);
 void 	infixToPostfix(char* infix, char* postfix);
 int 	evaluatePostfix(char* postfix);
+char	*itoa(int n);
 
 #endif

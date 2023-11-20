@@ -20,18 +20,37 @@
 
 void program() {
     statements();
+	printf("Result ==> ");
+	for (int i = 0; i < varLen; i++)
+		printf("%s: %s; ", var[i].name, var[i].value);
+	printf("\n");
 }
 
 void statements() {
     statement();
     if (nextToken == SEMI_COLON) {
         //match(SEMI_COLON);
-		printf("%s\n", formular);
+		//printf("%s\n", formular);
+		printf("%s", line);
+		//printf("formular : %s\n", formular);
 		printf("ID : %d ; CONST : %d ; OP : %d ;\n", cntId, cntConst, cntOp);
+		if (err == 0)
+			printf("(OK)\n");
+		else if (err == 1)
+			printf("(Error) duplication operator : process by adding the last op\n");
+		else if (err == 2)
+			printf("(Error) wrong ident name : remove front wrong part\n");
+		else if (err == 3)
+			printf("(Error) not defined ident : use null value\n");
+		else
+			printf("(Error) \n");
 		formular[0] = 0;
 		cntId = 0;
 		cntConst = 0;
 		cntOp = 0;
+		lineLen = 0;
+		line[0] = 0;
+		err = 0;
 		lex();
 		if (nextChar == EOF)
 			return ;
@@ -42,16 +61,20 @@ void statements() {
 void statement() {
     ident();
 	var[varLen].name = strdup(lexeme);
-	printf("var name : %s", var[varLen].name);
+	//printf("var name : %s\n", var[varLen].name);
 	lex(); //add
+	strcat(line, " = ");
 	lex();
     //match(ASSIGN_OP);
     expression();
     if (nextToken == SEMI_COLON)
 	{
         //match(SEMI_COLON);
-		var[varLen].value = strdup(formular);
-		printf("var formular : %s\n", formular);
+		if (strchr(formular, '$'))
+			var[varLen].value = NULL;
+		else
+			var[varLen].value = evaluate(formular);
+		//printf("var value : %s\n", var[varLen].value);
 		varLen++;
 	}
     else
@@ -71,6 +94,8 @@ void term_tail() {
 	{
         //match(ADD_OP);
 		strcat(formular, "+");
+		if (strlen(lexeme) != 1)
+			err = 1;
 		lex();
         term();
         term_tail();
@@ -79,6 +104,8 @@ void term_tail() {
 	{
 		//match(SUB_OP);
 		strcat(formular, "-");
+		if (strlen(lexeme) != 1)
+			err = 1;
 		lex();
 		term();
 		term_tail();
@@ -96,6 +123,8 @@ void factor_tail() {
 	{
         //match(MULT_OP);
 		strcat(formular, "*");
+		if (strlen(lexeme) != 1)
+			err = 1;
 		lex();
         factor();
         factor_tail();
@@ -104,6 +133,8 @@ void factor_tail() {
 	{
 		//match(DIV_OP);
 		strcat(formular, "/");
+		if (strlen(lexeme) != 1)
+			err = 1;
 		lex();
 		factor();
 		factor_tail();
@@ -115,26 +146,36 @@ void factor() {
     if (nextToken == LEFT_PAREN) {
         //match(LEFT_PAREN);
 		strcat(formular, "(");
+		if (strlen(lexeme) != 1)
+			err = 1;
 		lex();
         expression();
 		if (nextToken == RIGHT_PAREN)
 		{
 			strcat(formular, ")");
+			if (strlen(lexeme) != 1)
+				err = 1;
 			lex();
 		}
 		else
 			error();
         //match(RIGHT_PAREN);
     } else if (nextToken == IDENT) {
-		if (searchValue == NULL)
-			error();
-		strcat(formular, searchValue(lexeme));
-        printf("Identifier parsed: %s\n", lexeme);
+		if (searchValue(lexeme) == NULL)
+		{
+			err = 3;
+			lexeme[0] = '$';
+			lexeme[1] = 0;
+			strcat(formular, lexeme);
+		}
+		else
+			strcat(formular, searchValue(lexeme));
+        //printf("Identifier parsed: %s\n", lexeme);
         ident();
 		lex();
     } else if (nextToken == INT_LIT) {
 		strcat(formular, lexeme);
-        printf("Constant parsed: %s\n", lexeme);
+        //printf("Constant parsed: %s\n", lexeme);
         constt();
     } else {
         error();
@@ -143,12 +184,31 @@ void factor() {
 
 void ident() {
 	if (nextToken == IDENT)
-	{
 		cntId++;
-		//lex();
-	}
 	else
-		error();
+	{
+		//printf("Charclass in ident : %d", nextChar);
+		if (charClass == LETTER)
+		{
+			lexLen = 0;
+			addChar();
+			getChar();
+			while (charClass == LETTER || charClass == DIGIT)
+			{
+				addChar(); 
+				getChar();
+			}
+			nextToken = IDENT;
+			lexLen = 0;
+			err = 2;
+			ident();
+		}
+		else
+		{
+			lex();
+			ident();
+		}
+	}
 }
 
 void constt() {
@@ -171,9 +231,10 @@ void match(int expectedToken) {
 
 char	*searchValue(char *s)
 {
-	for (int i = 0; i <= varLen; i++)
+	//printf("searchValue : varLen %d\n", varLen);
+	for (int i = 0; i < varLen; i++)
 	{
-		if (strcmp(s, var[i].name))
+		if (!strcmp(s, var[i].name) && var[i].value != NULL)
 			return (strdup(var[i].value));
 	}
 	return NULL;
@@ -186,7 +247,7 @@ void error() {
 }
 
 int main(int argc, char **argv) {
-    printf("Starting ..... \n");
+    //printf("Starting ..... \n");
 
     if ((in_fp = fopen(argv[1], "r")) == NULL) {
         printf("ERROR");
@@ -194,7 +255,7 @@ int main(int argc, char **argv) {
 		lex();
         program();
         fclose(in_fp);
-        printf("File closed\n");
+        //printf("File closed\n");
     }
 
     return 0;
@@ -273,6 +334,10 @@ void getChar() {
     } 
     else
         charClass = EOF;
+    if (lineLen <= 198) {
+        line[lineLen++] = nextChar;
+        line[lineLen] = 0;
+    }
 }
 
 
@@ -336,6 +401,6 @@ int lex() {
         break;
     } /* End of switch */
 
-    printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
+    //printf("Next Token is : %d, Next lexeme is %s\n", nextToken, lexeme);
     return nextToken;
 } /* End of function lex */

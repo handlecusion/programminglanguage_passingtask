@@ -48,6 +48,11 @@ int		correct;
 char	formular[200];
 int		forLen;
 
+char	line[200];
+int		lineLen;
+
+int		err;
+
 /* Function declarations */
 int     lookup(char ch);
 void    addChar();
@@ -73,6 +78,7 @@ char	*searchValue(char *s);
 
 Var var[100];
 int	varLen;
+
 
 /*
 * #define SEME_COLON 

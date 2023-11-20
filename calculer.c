@@ -8,14 +8,14 @@
 //}
 
 // return calculer value / null when error
-int	evaluate(char *c)
+char	*evaluate(char *c)
 {
 	char	*d;
 	int		r;
 
 	d = (char *) malloc(strlen(c));
 	infixToPostfix(c, d);
-	return (evaluatePostfix(d));
+	return (itoa(evaluatePostfix(d)));
 }
 
 // 스택 초기화
@@ -135,4 +135,31 @@ int evaluatePostfix(char* postfix) {
     }
 
     return pop(&stack);
+}
+
+char	*itoa(int n)
+{
+	int		num = n;
+	int		l = 0;
+	int		i = 0;
+	char	r[12];
+
+	if (num == 0)
+	{
+		r[0] = '0';
+		r[1] = 0;
+		return (strdup(r));
+	}
+	while (num)
+	{
+		num /= 10;
+		l++;
+	}
+	r[l] = 0;
+	for (i = 0; i < l; i++)
+	{
+		r[l - i - 1] = '0' + n % 10;
+		n /= 10;
+	}
+	return (strdup(r));
 }
