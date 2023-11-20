@@ -1,34 +1,35 @@
-#pml
+# pml
 
-###programming assignment #1
+### programming assignment #1
 
-###develop environment
+### develop environment
 **OS** : ubuntu, macOS
 **Compiler** : gcc
 
-###how to execute
-1. enter *make* in current directory
+### how to execute
+1. enter **make** in current directory
 ```
 make
 ```
-2. execute *a.exe with textfile*(ex. test.txt)
+2. execute **a.exe with textfile**(ex. test.txt)
 ```
 ./a.exe test.txt
 ```
 
 ###explain implementation
-parser.c and parser.h
+**parser.c and parser.h**
 > parser는 Recursive Descent Parsing 기법을 통해 과제에서 제공된 문법으로 parsing을 진행한다.
 > parser.h는 include, global variable, struct definition, function declaration 을 포함한다.
 > parser.h에서 declaration한 부분들은 parser.c에 구체적으로 구현되어 있다.
 
-calculer.c and calculer.h
+**calculer.c and calculer.h**
 > calculer는 문자열 formular를 받아서 식을 계산하는 함수이다.
 > 비슷한 기능을 하는 함수로는 python의 eval function이 있다.
 > .c와 .h의 구조는 parser와 동일하다.
 
-###error, warning process
+### error, warning process
 statements에서 세미콜론(;)을 만나 처리하는 부분에 오류 메시지를 띄워주도록 했다. 에러가 없으면 (OK), 있다면 해당 에러에 맞는 메시지를 출력했다.
+밑으로 err 1번 케이스, 2번, 3번을 설명하겠다.
 ```c
 void statements() {
     statement();
